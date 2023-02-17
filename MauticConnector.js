@@ -309,7 +309,7 @@ class MauticConnector {
              * @param {string} emailAddress
              * @returns {Promise<{total: int, contacts: Object<int, MauticContact>}>}
              */
-            getContactByEmailAddress: emailAddress => this.contacts.listContacts({search: emailAddress}),
+            getContactByEmailAddress: emailAddress => this.contacts.queryContacts({email: emailAddress}),
             queryContacts: (queryParameters) => this._callApi({method: 'GET', url: this._makeQueryUrl('/contacts', queryParameters)}),
             listContacts: queryParameters => this._callApi({method: 'GET', url: this._makeUrl('/contacts', queryParameters)}),
             /**
