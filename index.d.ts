@@ -184,11 +184,12 @@ declare class Mautic {
 
   segments: {
     getSegment: (segmentId: Mautic.EntityID) => Promise<Mautic.Response>
-    listSegments: () => Promise<Mautic.Response>
+    listSegments: (queryParameters: Mautic.Parameters) => Promise<Mautic.Response>
     createSegment: (queryParameters: Mautic.Parameters) => Promise<Mautic.Response>
     editSegment: (method: Mautic.EditMethod, queryParameters: Mautic.Parameters, segmentId: Mautic.EntityID) => Promise<Mautic.Response>
     deleteSegment: (segmentId: Mautic.EntityID) => Promise<Mautic.Response>
     addContactToSegment: (segmentId: Mautic.EntityID, contactId: Mautic.EntityID) => Promise<Mautic.Response>
+    addContactsToSegment: (segmentId: Mautic.EntityID, contactIds: Mautic.Parameters) => Promise<Mautic.Response>
     removeContactFromSegment: (segmentId: Mautic.EntityID, contactId: Mautic.EntityID) => Promise<Mautic.Response>
   }
 
