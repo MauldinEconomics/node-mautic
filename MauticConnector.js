@@ -97,6 +97,57 @@ const HttpQueryHelper = require('./HttpQueryHelper');
  * @property {string} [enableErrorLogging] Default: false
  * @property {number} [timeoutInSeconds]
  */
+
+/**
+ * @typedef {object} MauticSegment
+ * @property {int}[id]
+ * @property {string} dateAdded
+ * @property {int} createdBy
+ * @property {string} createdByUser
+ * @property {string} dateModified
+ * @property {int} modifiedBy
+ * @property {string} modifiedByUser
+ * @property {string} name
+ * @property {string} alias
+ * @property {string} description
+ * @property {string} publicName
+ * @property {array<MauticSegmentFilter>} filters
+ * @property {boolean} isPublished
+ * @property {boolean} isGlobal
+ * @property {boolean} isPreferenceCenter
+ */
+
+/**
+ * @typedef {object} MauticSegmentFields
+ * @property {int} [id] Auto-generated Mautic ID
+ * @property {string} name
+ * @property {string} alias
+ * @property {string} [description]
+ * @property {boolean} isPublished
+ * @property {boolean} [isGlobal]
+ * @property {array<MauticSegmentFilter>} [filters]
+ */
+
+/**
+ * @typedef {object} MauticSegmentFilter
+ * @property {string} field
+ * @property {string} [object]
+ * @property {string} type
+ * @property {string} [filter]
+ * @property {string} glue
+ * @property {string} operator
+ * @property {number} [display]
+ */
+
+/**
+ * @typedef {object} CommonQueryParams
+ * @property {number} [limit]
+ * @property {number} [start]
+ * @property {string} [search]
+ * @property {string} [orderBy]
+ * @property {string} [orderByDir]
+ */
+
 class MauticConnector {
     /**
      * @param {MauticConnectorConstructorOptions} options
@@ -258,7 +309,7 @@ class MauticConnector {
              * @param {string} emailAddress
              * @returns {Promise<{total: int, contacts: Object<int, MauticContact>}>}
              */
-            getContactByEmailAddress: emailAddress => this.contacts.listContacts({search: emailAddress}),
+            getContactByEmailAddress: emailAddress => this.contacts.queryContacts({email: emailAddress}),
             queryContacts: (queryParameters) => this._callApi({method: 'GET', url: this._makeQueryUrl('/contacts', queryParameters)}),
             listContacts: queryParameters => this._callApi({method: 'GET', url: this._makeUrl('/contacts', queryParameters)}),
             /**
@@ -434,12 +485,50 @@ class MauticConnector {
 
         // noinspection JSUnusedGlobalSymbols
         this.segments = {
+            /**
+             * @param {number} segmentId
+             * @returns {Promise<list: MauticSegment>}
+             */
             getSegment: segmentId => this._callApi({method: 'GET', url: this._makeUrl('/segments/' + segmentId + '')}),
-            listSegments: () => this._callApi({method: 'GET', url: this._makeUrl('/segments')}),
+            /**
+             * @param {CommonQueryParams} queryParameters
+             * @returns {Promise<{total: number, lists: Object<number: MauticSegment>}>}
+             */
+            listSegments: queryParameters => this._callApi({method: 'GET', url: this._makeUrl('/segments', queryParameters)}),
+            /**
+             * @param {MauticSegmentFields} queryParameters
+             * @returns {Promise<{list: MauticSegment}>}
+             */
             createSegment: queryParameters => this._callApi({method: 'POST', url: this._makeUrl('/segments/new'), body: JSON.stringify(queryParameters)}),
+            /**
+             * @param {'PUT'|'PATCH'} method
+             * @param {MauticSegmentFields} queryParameters
+             * @param {number} segmentId
+             * @returns {Promise<list: MauticSegment>}
+             */
             editSegment: (method, queryParameters, segmentId) => this._callApi({method: this._ensureMethodIsPutOrPatch(method), url: this._makeUrl('/segments/' + segmentId + '/edit'), body: JSON.stringify(queryParameters)}),
+            /**
+             * @param {number} segmentId
+             * @returns {Promise<list: MauticSegment>}
+             */
             deleteSegment: segmentId => this._callApi({method: 'DELETE', url: this._makeUrl('/segments/' + segmentId + '/delete')}),
+            /**
+             * @param {number} segmentId
+             * @param {number} contactId
+             * @returns {Promise<{success: boolean}>}
+             */
             addContactToSegment: (segmentId, contactId) => this._callApi({method: 'POST', url: this._makeUrl('/segments/' + segmentId + '/contact/' + contactId + '/add')}),
+            /**
+             * @param {number} segmentId
+             * @param {ids: array<number>} contactIds
+             * @returns {Promise<success: boolean, details: object<string, {success: boolean}>}
+             */
+            addContactsToSegment: (segmentId, contactIds) => this._callApi({method: 'POST', url: this._makeUrl('/segments/' + segmentId + '/contacts/add'), body: JSON.stringify(contactIds)}),
+            /**
+             * @param {number} segmentId
+             * @param {number} contactId
+             * @returns {Promise<{success: boolean}>}
+             */
             removeContactFromSegment: (segmentId, contactId) => this._callApi({method: 'POST', url: this._makeUrl('/segments/' + segmentId + '/contact/' + contactId + '/remove')})
         };
 
